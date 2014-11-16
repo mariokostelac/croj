@@ -6,9 +6,10 @@ container_base=""
 function help {
     echo 'Available commands: '
     echo
-    echo 'get   - downloads the task(s) definitions and test cases'
-    echo 'dummy - tests given code against dummy test cases'
-    echo 'test  - tests given code against all test cases'
+    echo 'get       - downloads the task(s) definitions and test cases'
+    echo 'dummy     - tests given code against dummy test cases'
+    echo 'test      - tests given code against all test cases'
+    echo 'upgrade   - upgrades spoj to the newest version'
     echo
 }
 
@@ -87,6 +88,10 @@ function compile {
     docker run --rm -v ~/.croj:/croj $container_base bash -c "$build_command" # bash command
 }
 
+function upgrade {
+    git pull origin master
+}
+
 if [[ $# -lt 1 ]]; then
     help
     exit 1
@@ -101,6 +106,8 @@ elif [[ $cmd == "dummy" ]]; then
     dummy "$@"
 elif [[ $cmd == "test" ]]; then
     test_program "$@"
+elif [[ $cmd == "upgrade" ]]; then
+    upgrade
 else
     help
     exit 1

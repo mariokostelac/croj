@@ -69,9 +69,10 @@ function test_all {
     runner_id=$(docker run -d -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $container_base bash -c 'while :; do sleep 100; done')
     for in in $(find "$(pwd)/$test_data" -name "$file_pattern"); do
         output=$(docker exec $runner_id ./croj/run_single.sh "/test_data/$(basename $in)" "$timelimit")
+        echo $output
     done
-    docker kill $runner_id
-    docker rm $runner_id
+    docker kill $runner_id > /dev/null
+    docker rm $runner_id > /dev/null
 }
 
 function compile {

@@ -64,11 +64,6 @@ function test_all {
     docker run --rm -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $container_base ./croj/test.sh # 2> /dev/null
 }
 
-function test_dummy {
-    test_data=$1
-    docker run --rm -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $container_base ./croj/test.sh dummy # 2> /dev/null
-}
-
 function compile {
     if [[ $# -lt 1 ]]; then
         echo 'No source file given for compilation!'

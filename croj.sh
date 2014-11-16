@@ -61,7 +61,17 @@ function test_dummy {
 
 function test_all {
     test_data=$1
-    docker run --rm -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $container_base ./croj/test.sh # 2> /dev/null
+    file_pattern="*.in.*"
+    timelimit=$(cat $test_data/timelimit)
+    if [[ $timelimit == "" ]]; then
+        timelimit=1
+    fi
+    runner_id=$(docker run -d -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $container_base bash -c 'while :; do sleep 100; done')
+    for in in $(find "$(pwd)/$test_data" -name "$file_pattern"); do
+        output=$(docker exec $runner_id ./croj/run_single.sh "/test_data/$(basename $in)" "$timelimit")
+    done
+    docker kill $runner_id
+    docker rm $runner_id
 }
 
 function compile {

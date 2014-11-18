@@ -7,7 +7,6 @@ function help {
     echo 'Available commands: '
     echo
     echo 'get       - downloads the task(s) definitions and test cases'
-    echo 'dummy     - tests given code against dummy test cases'
     echo 'test      - tests given code against all test cases'
     echo 'upgrade   - upgrades spoj to the newest version'
     echo
@@ -36,15 +35,6 @@ function prepare_src {
     cp $@ $src_tmp
 }
 
-function dummy {
-    task=$1
-    shift 1
-    files=$@
-    prepare_src "$files"
-    compile "$files"
-    test_dummy $task
-}
-
 function test_program {
     task=$1
     shift 1
@@ -52,11 +42,6 @@ function test_program {
     prepare_src "$files"
     compile "$files"
     test_all $task
-}
-
-function test_dummy {
-    test_data=$1
-    docker run --rm -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $container_base ./croj/test.sh dummy # 2> /dev/null
 }
 
 function test_all {
@@ -102,8 +87,6 @@ shift 1
 
 if [[ $cmd == "get" ]]; then
     get "$@"
-elif [[ $cmd == "dummy" ]]; then
-    dummy "$@"
 elif [[ $cmd == "test" ]]; then
     test_program "$@"
 elif [[ $cmd == "upgrade" ]]; then

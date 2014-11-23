@@ -111,6 +111,8 @@ function test_all {
 }
 
 function upgrade {
+    echo 'Upgrading croj to the latest version'
+    cd ~/.croj
     git pull origin master
 }
 

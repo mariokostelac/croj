@@ -105,7 +105,7 @@ function detect_checker {
 function test_all {
     test_data=$1
     tester_id=$(docker run -d -v /communication -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $test_base ./croj/test.sh)
-    docker run --rm --volumes-from "$tester_id" -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data -v /communication $run_base ./croj/run.sh
+    docker run --rm --volumes-from "$tester_id" -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $run_base ./croj/run.sh
     docker kill $tester_id > /dev/null
     docker rm $tester_id > /dev/null
 }

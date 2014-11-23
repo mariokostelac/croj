@@ -53,8 +53,9 @@ while true; do
   # prepare name of input/output files
   input_file=${tests[i++]}
   out=${input_file/.in./.out.}
+  program_out=${input_file/.in./.pout.}
   # execute the program
-  (time -p (./croj/timeout.sh "$timelimit" bash -c "./croj/tmp/bin/program < $input_file > /communication/program_output" )) > /croj/tmp/time 2>&1
+  (time -p (./croj/timeout.sh "$timelimit" bash -c "./croj/tmp/bin/program < $input_file > $program_out" )) > /croj/tmp/time 2>&1
   tle=$?
   exec_time=$(cat /croj/tmp/time | grep real | cut -d' ' -f 2)
   # print the user friendly result
@@ -64,7 +65,7 @@ while true; do
   # send the command to test it
   echo $input_file >&2
   echo $out >&2
-  echo "/communication/program_output" >&2
+  echo "$program_out" >&2
   # read the response
   read num_lines
   if [[ $num_lines -lt 1 ]]; then

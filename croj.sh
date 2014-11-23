@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
-src_tmp=~/.croj/tmp/src
-container_base=""
+set -e
+
+declare src_tmp=~/.croj/tmp/src
+declare bin_tmp=~/.croj/tmp/bin
+declare container_base=""
 
 function help {
     echo 'Available commands: '
@@ -27,29 +30,42 @@ function get {
     git clone $repo_uri
 }
 
-function prepare_src {
-    if [[ ! -d $src_tmp ]]; then
-        mkdir -p $src_tmp
+function prepare_bin {
+    if [[ -d $bin_tmp ]]; then
+      rm -r $bin_tmp
     fi
-    find $src_tmp -type f | xargs rm
-    cp $@ $src_tmp
+    mkdir -p $bin_tmp
+}
+
+function prepare_src {
+    if [[ -d $src_tmp ]]; then
+        rm -r $src_tmp
+    fi
+    mkdir -p $src_tmp
+    cp "$@" "$src_tmp"
 }
 
 function test_program {
     task=$1
     shift 1
     files=$@
+
+    prepare_bin
+
+    # prepare and build program
     prepare_src "$files"
     compile "$files"
-    test_all $task
-}
+    run_base=$container_base
+    mv ~/.croj/tmp/bin/a.out ~/.croj/tmp/bin/program
 
-function test_all {
-    test_data=$1
-    tester_id=$(docker run -d -v /communication -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $container_base ./croj/test.sh)
-    docker run --rm --volumes-from "$tester_id" -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data -v /communication $container_base ./croj/run.sh # 2> /dev/null
-    docker kill $tester_id > /dev/null
-    docker rm $tester_id > /dev/null
+    # prepare and build checker
+    detect_checker
+    prepare_src "$checker"
+    compile "$checker"
+    test_base=$container_base
+    mv ~/.croj/tmp/bin/a.out ~/.croj/tmp/bin/checker
+
+    test_all $task
 }
 
 function compile {
@@ -60,17 +76,38 @@ function compile {
     ext=${1##*.}
     if [[ $ext == "cpp" ]]; then
         container_base="gcc"
-        build_command="g++ /croj/tmp/src/*.cpp -o /croj/tmp/a.out"
-    elif [[ $ext == "c" ]]; then
-        echo 'TODO'
-        exit 1
-    elif [[ $ext == "go" ]]; then
-        echo 'TODO'
-        exit 1
+        build_command="g++ /croj/tmp/src/* -o /croj/tmp/bin/a.out"
+    elif [[ $ext == "sh" ]]; then
+        # TODO: change this to something more appropriate
+        container_base="gcc"
+        build_command="mv /croj/tmp/src/* /croj/tmp/bin/a.out && chmod +x /croj/tmp/bin/a.out"
+    else
+        echo "'$ext' extension not supported"
+        exit 12
     fi
     echo 'Compiling...'
-    docker run --rm -v ~/.croj:/croj $container_base bash -c "$build_command" # bash command
+    docker run --rm -v ~/.croj:/croj $container_base bash -c "$build_command"
     echo 'Compiled!'
+}
+
+function detect_checker {
+    checker_cnt=$(find $task -name "checker.*" | wc -l)
+    checker=$(find $task -name "checker.*")
+    if [[ $checker_cnt -gt 1 ]]; then
+        echo "Found multiple checkers: $checker"
+        exit 11
+    fi
+    if [[ $checker_cnt -eq 0 ]]; then
+        checker=~/.croj/checkers/diff.sh
+    fi
+}
+
+function test_all {
+    test_data=$1
+    tester_id=$(docker run -d -v /communication -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $test_base ./croj/test.sh)
+    docker run --rm --volumes-from "$tester_id" -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data -v /communication $run_base ./croj/run.sh
+    docker kill $tester_id > /dev/null
+    docker rm $tester_id > /dev/null
 }
 
 function upgrade {

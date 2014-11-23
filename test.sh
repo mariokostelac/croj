@@ -19,9 +19,9 @@ while true; do
     read input
     read output
     read program_output
-    ./croj/tmp/bin/checker $input $output $program_output > /tmp/checker_output
-    wc -l < /tmp/checker_output
-    cat /tmp/checker_output
+    ./croj/tmp/bin/checker $input $output $program_output > /croj/tmp/checker_output
+    wc -l < /croj/tmp/checker_output
+    cat /croj/tmp/checker_output
 done < $input_pipe > $output_pipe
 
 rm $output_pipe

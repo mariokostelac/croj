@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+# set -e
 ################################################################################
 # This is the runner process. It sends the "input correct_output output"
 # parameters to the tester process, each in its own line.
@@ -55,17 +55,19 @@ while true; do
   out=${input_file/.in./.out.}
   program_out=${input_file/.in./.pout.}
   # execute the program
+  # TODO: sto ako se dogodi segfault?
   (time -p (./croj/timeout.sh "$timelimit" bash -c "./croj/tmp/bin/program < $input_file > $program_out" )) > /croj/tmp/time 2>&1
   tle=$?
   exec_time=$(cat /croj/tmp/time | grep real | cut -d' ' -f 2)
   # print the user friendly result
   if [[ $tle -ne 0 ]]; then
-    echo "TLE   ${exec_time}s  $input_file"
+    echo "TLE   ${exec_time}s  $input_file" >&2
+    continue
   fi
   # send the command to test it
-  echo $input_file >&2
-  echo $out >&2
-  echo "$program_out" >&2
+  echo $input_file
+  echo $out
+  echo $program_out
   # read the response
   read num_lines
   if [[ $num_lines -lt 1 ]]; then
@@ -75,8 +77,8 @@ while true; do
     for j in `seq 2 $num_lines`; do
       read line
     done
-    echo "$res  ${exec_time}s  $input_file"
+    echo "$res  ${exec_time}s  $input_file" >&2
   fi
-done < $input_pipe 2> $output_pipe
+done < $input_pipe > $output_pipe
 
 rm $output_pipe

@@ -9,6 +9,8 @@
 # First line of output is considered as AC/WA/[number of points] info.
 ################################################################################
 
+trap "exit" INT
+
 if [[ $# -eq 1 ]]; then
     tests_to_run=`echo $1 | tr "," " " | sort`
     read -a tests_to_run <<< "$tests_to_run"
@@ -65,7 +67,7 @@ while true; do
   fi
   k=$(( k+1 ))
   out=${input_file/.in./.out.}
-  program_out=${input_file/.in./.pout.}
+  program_out=/croj/tmp/$(basename ${input_file/.in./.pout.})
   # execute the program
   (time -p (./croj/timeout.sh "$timelimit" bash -c "./croj/tmp/bin/program < $input_file > $program_out 2> /dev/null" )) > /croj/tmp/time 2>&1
   status=$?

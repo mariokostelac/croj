@@ -2,8 +2,19 @@
 
 set -e
 
-declare src_tmp=~/.croj/tmp/src
-declare bin_tmp=~/.croj/tmp/bin
+# detecting the directory that contains this script
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+echo $DIR
+
+declare src_tmp=$DIR/tmp/src
+declare bin_tmp=$DIR/tmp/bin
 declare container_base=""
 
 function help {
@@ -68,14 +79,14 @@ function test_program {
     prepare_src "$files"
     compile "$files"
     run_base=$container_base
-    mv ~/.croj/tmp/bin/a.out ~/.croj/tmp/bin/program
+    mv $DIR/tmp/bin/a.out $DIR/tmp/bin/program
 
     # prepare and build checker
     detect_checker
     prepare_src "$checker"
     compile "$checker"
     test_base=$container_base
-    mv ~/.croj/tmp/bin/a.out ~/.croj/tmp/bin/checker
+    mv $DIR/tmp/bin/a.out $DIR/tmp/bin/checker
 
     test_all $task $tests_to_run
 }
@@ -98,7 +109,7 @@ function compile {
         exit 12
     fi
     echo 'Compiling...'
-    docker run --rm -v ~/.croj:/croj $container_base bash -c "$build_command"
+    docker run --rm -v $DIR:/croj $container_base bash -c "$build_command"
     echo 'Compiled!'
 }
 
@@ -110,22 +121,22 @@ function detect_checker {
         exit 11
     fi
     if [[ $checker_cnt -eq 0 ]]; then
-        checker=~/.croj/checkers/diff.sh
+        checker=$DIR/checkers/diff.sh
     fi
 }
 
 function test_all {
     test_data=$1
     tests_to_run=$2
-    tester_id=$(docker run -d -v /communication -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $test_base ./croj/test.sh)
-    docker run --rm --volumes-from "$tester_id" -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $run_base ./croj/run.sh $tests_to_run
+    tester_id=$(docker run -d -v /communication -v $DIR:/croj -v "$(pwd)/$test_data":/test_data $test_base ./croj/test.sh)
+    docker run -t -i --rm --volumes-from "$tester_id" -v $DIR:/croj -v "$(pwd)/$test_data":/test_data $run_base ./croj/run.sh $tests_to_run
     docker kill $tester_id > /dev/null
     docker rm $tester_id > /dev/null
 }
 
 function upgrade {
     echo 'Upgrading croj to the latest version'
-    cd ~/.croj
+    cd $DIR
     git pull origin master
 }
 

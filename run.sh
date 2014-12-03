@@ -60,13 +60,15 @@ while true; do
   out=${input_file/.in./.out.}
   program_out=${input_file/.in./.pout.}
   # execute the program
-  # TODO: sto ako se dogodi segfault?
-  (time -p (./croj/timeout.sh "$timelimit" bash -c "./croj/tmp/bin/program < $input_file > $program_out" )) > /croj/tmp/time 2>&1
-  tle=$?
+  (time -p (./croj/timeout.sh "$timelimit" bash -c "./croj/tmp/bin/program < $input_file > $program_out 2> /dev/null" )) > /croj/tmp/time 2>&1
+  status=$?
   exec_time=$(cat /croj/tmp/time | grep real | cut -d' ' -f 2)
   # print the user friendly result
-  if [[ $tle -ne 0 ]]; then
+  if [[ $status -eq 143 ]]; then
     echo "TLE   ${exec_time}s  $input_file" >&2
+    continue
+  elif [[ $status -ne 0 ]]; then
+    echo "RTE   ${exec_time}s  $input_file" >&2
     continue
   fi
   # send the command to test it

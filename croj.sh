@@ -46,6 +46,12 @@ function prepare_src {
 }
 
 function test_program {
+    getopts ":t" opt
+    if [[ $opt == "t" ]]; then
+        tests_to_run="$OPTARG"
+        shift 2
+    fi
+
     task=$1
     shift 1
     files=$@
@@ -65,7 +71,7 @@ function test_program {
     test_base=$container_base
     mv ~/.croj/tmp/bin/a.out ~/.croj/tmp/bin/checker
 
-    test_all $task
+    test_all $task $tests_to_run
 }
 
 function compile {
@@ -104,7 +110,8 @@ function detect_checker {
 
 function test_all {
     test_data=$1
-    tester_id=$(docker run -d -v /communication -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $test_base ./croj/test.sh)
+    tests_to_run=$2
+    tester_id=$(docker run -d -v /communication -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $test_base $tests_to_run ./croj/test.sh)
     docker run --rm --volumes-from "$tester_id" -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $run_base ./croj/run.sh
     docker kill $tester_id > /dev/null
     docker rm $tester_id > /dev/null

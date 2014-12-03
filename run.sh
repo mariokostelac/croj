@@ -9,6 +9,10 @@
 # First line of output is considered as AC/WA/[number of points] info.
 ################################################################################
 
+if [[ $# -eq 2 ]]; then
+    tests_to_run=`echo $2 | tr "," " "`
+fi
+
 file_pattern="*.in.*"
 
 # check the timelimit
@@ -40,6 +44,7 @@ tests_len=${#tests[@]}
 echo "Running..."
 echo "Timelimit     ${timelimit}s"
 echo "--------------------------------------------------------------------------------"
+
 i=0
 while true; do
   # wait for the start message

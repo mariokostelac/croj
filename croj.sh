@@ -32,25 +32,31 @@ function get {
 
 function prepare_bin {
     if [[ -d $bin_tmp ]]; then
-      rm -r $bin_tmp
+      yes | rm -r $bin_tmp
     fi
     mkdir -p $bin_tmp
 }
 
 function prepare_src {
     if [[ -d $src_tmp ]]; then
-        rm -r $src_tmp
+        yes | rm -r $src_tmp
     fi
     mkdir -p $src_tmp
     cp "$@" "$src_tmp"
 }
 
 function test_program {
-    getopts ":t" opt
-    if [[ $opt == "t" ]]; then
-        tests_to_run="$OPTARG"
-        shift 2
-    fi
+    while getopts "t:" opt; do
+        case $opt in
+            t)
+                tests_to_run="$OPTARG"
+                shift 2
+                ;;
+            ?) 
+                echo "todo"
+                ;;
+        esac
+    done
 
     task=$1
     shift 1
@@ -111,8 +117,8 @@ function detect_checker {
 function test_all {
     test_data=$1
     tests_to_run=$2
-    tester_id=$(docker run -d -v /communication -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $test_base $tests_to_run ./croj/test.sh)
-    docker run --rm --volumes-from "$tester_id" -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $run_base ./croj/run.sh
+    tester_id=$(docker run -d -v /communication -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $test_base ./croj/test.sh)
+    docker run --rm --volumes-from "$tester_id" -v ~/.croj:/croj -v "$(pwd)/$test_data":/test_data $run_base ./croj/run.sh $tests_to_run
     docker kill $tester_id > /dev/null
     docker rm $tester_id > /dev/null
 }

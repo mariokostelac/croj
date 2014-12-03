@@ -9,8 +9,9 @@
 # First line of output is considered as AC/WA/[number of points] info.
 ################################################################################
 
-if [[ $# -eq 2 ]]; then
-    tests_to_run=`echo $2 | tr "," " "`
+if [[ $# -eq 1 ]]; then
+    tests_to_run=`echo $1 | tr "," " " | sort`
+    read -a tests_to_run <<< "$tests_to_run"
 fi
 
 file_pattern="*.in.*"
@@ -46,6 +47,7 @@ echo "Timelimit     ${timelimit}s"
 echo "--------------------------------------------------------------------------------"
 
 i=0
+k=0
 while true; do
   # wait for the start message
   if [[ $i -eq 0 ]]; then
@@ -56,7 +58,12 @@ while true; do
     break
   fi
   # prepare name of input/output files
-  input_file=${tests[i++]}
+  input_file=${tests[i]}
+  i=$(( i+1 ))
+  if [[ $# -eq 1 && ${tests_to_run[k]} -ne $i ]]; then
+      continue
+  fi
+  k=$(( k+1 ))
   out=${input_file/.in./.out.}
   program_out=${input_file/.in./.pout.}
   # execute the program
@@ -64,6 +71,7 @@ while true; do
   status=$?
   exec_time=$(cat /croj/tmp/time | grep real | cut -d' ' -f 2)
   # print the user friendly result
+  printf "$i: " >&2
   if [[ $status -eq 143 ]]; then
     echo "TLE   ${exec_time}s  $input_file" >&2
     continue

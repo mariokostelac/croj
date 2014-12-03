@@ -9,6 +9,8 @@
 # First line of output is considered as AC/WA/[number of points] info.
 ################################################################################
 
+trap "exit" INT
+
 file_pattern="*.in.*"
 
 # check the timelimit

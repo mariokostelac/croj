@@ -53,7 +53,7 @@ while true; do
   # prepare name of input/output files
   input_file=${tests[i++]}
   out=${input_file/.in./.out.}
-  program_out=${input_file/.in./.pout.}
+  program_out=/croj/tmp/$(basename ${input_file/.in./.pout.})
   # execute the program
   (time -p (./croj/timeout.sh "$timelimit" bash -c "./croj/tmp/bin/program < $input_file > $program_out 2> /dev/null" )) > /croj/tmp/time 2>&1
   status=$?

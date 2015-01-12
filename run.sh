@@ -69,7 +69,7 @@ while true; do
   out=${input_file/.in./.out.}
   program_out=/croj/tmp/$(basename ${input_file/.in./.pout.})
   # execute the program
-  (time -p (./croj/timeout.sh "$timelimit" bash -c "./croj/tmp/bin/program < $input_file > $program_out 2> /dev/null" )) > /croj/tmp/time 2>&1
+  (time -p (./croj/timeout.sh "$timelimit" bash -c "./croj/tmp/bin/program < $input_file > $program_out 2>> /croj/tmp/err" )) > /croj/tmp/time 2>&1
   status=$?
   exec_time=$(cat /croj/tmp/time | grep real | cut -d' ' -f 2)
   # print the user friendly result

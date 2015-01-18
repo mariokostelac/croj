@@ -11,8 +11,6 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-echo $DIR
-
 declare src_tmp=$DIR/tmp/src
 declare bin_tmp=$DIR/tmp/bin
 declare container_base=""
@@ -63,13 +61,14 @@ function test_program {
                 tests_to_run="$OPTARG"
                 shift 2
                 ;;
-            ?) 
+            ?)
                 echo "todo"
+                exit 1
                 ;;
         esac
     done
 
-    task=$1
+    tests_dir=$(readlink -f $1)
     shift 1
     files=$@
 
@@ -88,7 +87,7 @@ function test_program {
     test_base=$container_base
     mv $DIR/tmp/bin/a.out $DIR/tmp/bin/checker
 
-    test_all $task $tests_to_run
+    test_all $tests_dir $tests_to_run
 }
 
 function compile {
@@ -114,8 +113,8 @@ function compile {
 }
 
 function detect_checker {
-    checker_cnt=$(find $task -name "checker.*" | wc -l)
-    checker=$(find $task -name "checker.*")
+    checker_cnt=$(find $tests_dir -name "checker.*" | wc -l)
+    checker=$(find $tests_dir -name "checker.*")
     if [[ $checker_cnt -gt 1 ]]; then
         echo "Found multiple checkers: $checker"
         exit 11
@@ -128,8 +127,12 @@ function detect_checker {
 function test_all {
     test_data=$1
     tests_to_run=$2
-    tester_id=$(docker run -d -v /communication -v $DIR:/croj -v "$(pwd)/$test_data":/test_data $test_base ./croj/test.sh)
-    docker run -t -i --rm --volumes-from "$tester_id" -v $DIR:/croj -v "$(pwd)/$test_data":/test_data $run_base ./croj/run.sh $tests_to_run
+    tester_id=$(docker run -d \
+      -v /communication \
+      -v $DIR:/croj \
+      -v "$test_data":/test_data \
+      $test_base ./croj/test.sh)
+    docker run -t -i --rm --volumes-from "$tester_id" -v $DIR:/croj -v "$test_data":/test_data $run_base ./croj/run.sh $tests_to_run
     docker kill $tester_id > /dev/null
     docker rm $tester_id > /dev/null
 }

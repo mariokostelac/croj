@@ -16,8 +16,11 @@ declare src_tmp=$work_dir/src
 declare bin_tmp=$work_dir/bin
 declare container_base=""
 
-# remove status files
-find $work_dir -name 'status.*' | xargs rm
+# clean working dir
+if [[ -d $work_dir ]]; then
+  yes | rm -r $work_dir
+fi
+mkdir -p $work_dir
 
 touch $work_dir/status.started
 

@@ -48,7 +48,7 @@ echo "Running..."
 echo "Timelimit     ${timelimit}s"
 echo "--------------------------------------------------------------------------------"
 
-log_file="/croj/tmp/run.log"
+log_file="/croj/tmp/status.running"
 
 # remove the log file if it already exists
 if [[ -f $log_file ]]; then

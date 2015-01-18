@@ -11,9 +11,15 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-declare src_tmp=$DIR/tmp/src
-declare bin_tmp=$DIR/tmp/bin
+declare work_dir=$DIR/tmp
+declare src_tmp=$work_dir/src
+declare bin_tmp=$work_dir/bin
 declare container_base=""
+
+# remove status files
+find $work_dir -name 'status.*' | xargs rm
+
+touch $work_dir/status.started
 
 function help {
     echo 'Available commands: '
@@ -83,21 +89,25 @@ function test_program {
 
     prepare_bin
 
+    touch $work_dir/status.compiling
+
     # prepare and build program
+    echo "program" >> $work_dir/status.compiling
     echo "Preparing the program..."
     prepare_src "$files"
-    compile "$files"
+    compile "$files" >> $work_dir/status.compiling 2>&1
     run_base=$container_base
-    mv $DIR/tmp/bin/a.out $DIR/tmp/bin/program
+    mv $bin_tmp/a.out $bin_tmp/program
     echo
 
     # prepare and build checker
+    echo "checker" >> $work_dir/status.compiling
     echo "Preparing the checker..."
     detect_checker
     prepare_src "$checker"
-    compile "$checker"
+    compile "$checker" >> $work_dir/status.compiling 2>&1
     test_base=$container_base
-    mv $DIR/tmp/bin/a.out $DIR/tmp/bin/checker
+    mv $bin_tmp/a.out $bin_tmp/checker
     echo
 
     test_all $tests_dir $tests_to_run
@@ -120,9 +130,7 @@ function compile {
         echo "'$ext' extension not supported"
         exit 12
     fi
-    echo -n 'Compiling... '
     docker run --rm -v $DIR:/croj $container_base bash -c "$build_command"
-    echo 'Compiled!'
 }
 
 function detect_checker {

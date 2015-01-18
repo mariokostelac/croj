@@ -7,5 +7,4 @@ if [[ $? -eq 0 ]]; then
 else
   echo "×"
   echo "Wrong answer"
-  cat $diff_file
 fi

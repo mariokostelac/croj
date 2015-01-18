@@ -18,25 +18,9 @@ declare container_base=""
 function help {
     echo 'Available commands: '
     echo
-    echo 'get       - downloads the task(s) definitions and test cases'
     echo 'test      - tests given code against all test cases'
     echo 'upgrade   - upgrades spoj to the newest version'
     echo
-}
-
-function help_get {
-    echo '#TODO'
-}
-
-function get {
-    if [[ $# -lt 1 ]]; then
-        help_get
-        exit 1
-    fi
-    repo_name=$(echo $1 | cut -d/ -f1)
-    repo_uri="https://github.com/mariokostelac/$repo_name/"
-    echo "Pulling repo $repo_name... ($repo_uri)"
-    git clone $repo_uri
 }
 
 function prepare_bin {
@@ -155,9 +139,7 @@ fi
 cmd=$1
 shift 1
 
-if [[ $cmd == "get" ]]; then
-    get "$@"
-elif [[ $cmd == "test" ]]; then
+if [[ $cmd == "test" ]]; then
     test_program "$@"
 elif [[ $cmd == "upgrade" ]]; then
     upgrade

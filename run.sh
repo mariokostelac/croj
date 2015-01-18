@@ -48,6 +48,14 @@ echo "Running..."
 echo "Timelimit     ${timelimit}s"
 echo "--------------------------------------------------------------------------------"
 
+log_file="/croj/tmp/run.log"
+
+# remove the log file if it already exists
+if [[ -f $log_file ]]; then
+  rm $log_file
+fi
+touch $log_file
+
 i=0
 k=0
 while true; do
@@ -66,36 +74,54 @@ while true; do
       continue
   fi
   k=$(( k+1 ))
+
   out=${input_file/.in./.out.}
   program_out=/croj/tmp/$(basename ${input_file/.in./.pout.})
+
+  echo $i >> $log_file
+
   # execute the program
   (time -p (./croj/timeout.sh "$timelimit" bash -c "./croj/tmp/bin/program < $input_file > $program_out 2>> /croj/tmp/err" )) > /croj/tmp/time 2>&1
   status=$?
   exec_time=$(cat /croj/tmp/time | grep real | cut -d' ' -f 2)
-  # print the user friendly result
+
+  # log the status and exec time
+  echo $status >> $log_file
+  echo $exec_time >> $log_file
+
+  # print the fail status
   printf "$i: " >&2
   if [[ $status -eq 143 ]]; then
     echo "TLE   ${exec_time}s  $input_file" >&2
+    echo 0 >> $log_file # 0 lines from checker
     continue
   elif [[ $status -ne 0 ]]; then
     echo "RTE   ${exec_time}s  $input_file" >&2
+    echo 0 >> $log_file # 0 lines from checker
     continue
   fi
+
   # send the command to test it
   echo $input_file
   echo $out
   echo $program_out
+
   # read the response
+  num_lines=0
   read num_lines
+  echo $num_lines >> $log_file
   if [[ $num_lines -lt 1 ]]; then
     res="?"
   else
     read res
+    echo $res >> $log_file
     for j in `seq 2 $num_lines`; do
       read line
+      echo $line >> $log_file
     done
     echo "$res  ${exec_time}s  $input_file" >&2
   fi
+
 done < $input_pipe > $output_pipe
 
 rm $output_pipe

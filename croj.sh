@@ -153,6 +153,7 @@ function test_all {
     tests_to_run=$2
     tester_id=$(docker run -d \
       --net=none \
+      -m 128m \
       -v /communication \
       -v $DIR:/croj \
       -v "$test_data":/test_data:ro \
@@ -160,6 +161,7 @@ function test_all {
     docker run -t -i --rm \
       --net=none \
       --volumes-from "$tester_id" \
+      -m 128m \
       $run_base ./croj/run.sh $tests_to_run
     docker kill $tester_id > /dev/null
     docker rm $tester_id > /dev/null

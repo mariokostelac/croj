@@ -23,6 +23,22 @@ function help {
     echo
 }
 
+function help_test {
+    echo "usage: $0 [-t <test_cases>] <tests_dir> <source_file...>"
+    echo
+    echo "Runs a program from given <source_filese against all the tests "
+    echo "in given <tests_dir>."
+    echo
+    echo "-t <test_cases>:   test case indices to run, starts with 1;"
+    echo "                   by default, all tests are run"
+    echo
+    echo "Examples:"
+    echo
+    echo "$0 task_1 solutions1.cpp - runs all tests"
+    echo "$0 -t 1,3,4 task_1 solutions1.cpp - runs first, third and fourth tests"
+    echo
+}
+
 function prepare_bin {
     if [[ -d $bin_tmp ]]; then
       yes | rm -r $bin_tmp
@@ -39,8 +55,17 @@ function prepare_src {
 }
 
 function test_program {
-    while getopts "t:" opt; do
+    if [[ $# -lt 1 ]]; then
+      help_test
+      exit 1
+    fi
+
+    while getopts "ht:" opt; do
         case $opt in
+            h)
+                help_test
+                exit 1
+                ;;
             t)
                 tests_to_run="$OPTARG"
                 shift 2

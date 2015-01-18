@@ -130,9 +130,13 @@ function test_all {
     tester_id=$(docker run -d \
       -v /communication \
       -v $DIR:/croj \
-      -v "$test_data":/test_data \
+      -v "$test_data":/test_data:ro \
       $test_base ./croj/test.sh)
-    docker run -t -i --rm --volumes-from "$tester_id" -v $DIR:/croj -v "$test_data":/test_data $run_base ./croj/run.sh $tests_to_run
+    docker run -t -i --rm \
+      --volumes-from "$tester_id" \
+      -v $DIR:/croj \
+      -v "$test_data":/test_data:ro \
+      $run_base ./croj/run.sh $tests_to_run
     docker kill $tester_id > /dev/null
     docker rm $tester_id > /dev/null
 }

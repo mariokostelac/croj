@@ -84,17 +84,21 @@ function test_program {
     prepare_bin
 
     # prepare and build program
+    echo "Preparing the program..."
     prepare_src "$files"
     compile "$files"
     run_base=$container_base
     mv $DIR/tmp/bin/a.out $DIR/tmp/bin/program
+    echo
 
     # prepare and build checker
+    echo "Preparing the checker..."
     detect_checker
     prepare_src "$checker"
     compile "$checker"
     test_base=$container_base
     mv $DIR/tmp/bin/a.out $DIR/tmp/bin/checker
+    echo
 
     test_all $tests_dir $tests_to_run
 }
@@ -116,7 +120,7 @@ function compile {
         echo "'$ext' extension not supported"
         exit 12
     fi
-    echo 'Compiling...'
+    echo -n 'Compiling... '
     docker run --rm -v $DIR:/croj $container_base bash -c "$build_command"
     echo 'Compiled!'
 }

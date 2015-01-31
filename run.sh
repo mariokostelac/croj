@@ -124,4 +124,6 @@ while true; do
 
 done < $input_pipe > $output_pipe
 
+touch /croj/tmp/status.done
+
 rm $output_pipe

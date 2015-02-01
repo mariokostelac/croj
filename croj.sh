@@ -29,6 +29,7 @@ function help {
     echo
     echo 'test      - tests given code against all test cases'
     echo 'upgrade   - upgrades spoj to the newest version'
+    echo 'clean     - cleans the working directory'
     echo
 }
 
@@ -68,6 +69,8 @@ function test_program {
       help_test
       exit 1
     fi
+
+    clean
 
     while getopts "ht:" opt; do
         case $opt in
@@ -173,6 +176,12 @@ function upgrade {
     git pull origin master
 }
 
+function clean {
+    echo 'Cleaning working dir'
+    rm -r $work_dir
+    mkdir -p $work_dir
+}
+
 if [[ $# -lt 1 ]]; then
     help
     exit 1
@@ -185,6 +194,8 @@ if [[ $cmd == "test" ]]; then
     test_program "$@"
 elif [[ $cmd == "upgrade" ]]; then
     upgrade
+elif [[ $cmd == "clean" ]]; then
+    clean
 else
     help
     exit 1

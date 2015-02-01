@@ -98,7 +98,6 @@ function test_program {
     touch $work_dir/status.compiling
 
     # prepare and build program
-    echo "program" >> $work_dir/status.compiling
     echo "Preparing the program..."
     prepare_src "$files"
     compile "$files" >> $work_dir/status.compiling 2>&1
@@ -107,11 +106,10 @@ function test_program {
     echo
 
     # prepare and build checker
-    echo "checker" >> $work_dir/status.compiling
     echo "Preparing the checker..."
     detect_checker
     prepare_src "$checker"
-    compile "$checker" >> $work_dir/status.compiling 2>&1
+    compile "$checker" >> $work_dir/status.compiling.checker 2>&1
     test_base=$container_base
     mv $bin_tmp/a.out $bin_tmp/checker
     echo

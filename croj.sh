@@ -159,7 +159,7 @@ function test_all {
       -v $DIR:/croj \
       -v "$test_data":/test_data:ro \
       $test_base ./croj/test.sh)
-    docker run -t -i --rm \
+    docker run -rm \
       --net=none \
       --volumes-from "$tester_id" \
       -m 128m \

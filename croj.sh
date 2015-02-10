@@ -125,7 +125,7 @@ function compile {
     ext=${1##*.}
     if [[ $ext == "cpp" ]]; then
         container_base="gcc"
-        build_command="g++ -O2 -o /croj/tmp/bin/a.out /croj/tmp/src/*"
+        build_command="g++ -O2 -std=c++11 -o /croj/tmp/bin/a.out /croj/tmp/src/*"
     elif [[ $ext == "sh" ]]; then
         # TODO: change this to something more appropriate
         container_base="gcc"

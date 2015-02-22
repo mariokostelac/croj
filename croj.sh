@@ -124,11 +124,11 @@ function compile {
     fi
     ext=${1##*.}
     if [[ $ext == "cpp" ]]; then
-        container_base="gcc"
+        container_base="gcc:4.8"
         build_command="g++ -O2 -std=c++11 -o /croj/tmp/bin/a.out /croj/tmp/src/*"
     elif [[ $ext == "sh" ]]; then
         # TODO: change this to something more appropriate
-        container_base="gcc"
+        container_base="gcc:4.8"
         build_command="mv /croj/tmp/src/* /croj/tmp/bin/a.out && chmod +x /croj/tmp/bin/a.out"
     else
         echo "'$ext' extension not supported"
@@ -159,7 +159,7 @@ function test_all {
       -v $DIR:/croj \
       -v "$test_data":/test_data:ro \
       $test_base ./croj/test.sh)
-    docker run -rm \
+    docker run --rm \
       --net=none \
       --volumes-from "$tester_id" \
       -m 128m \

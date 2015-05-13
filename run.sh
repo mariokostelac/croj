@@ -78,7 +78,7 @@ while true; do
   out=${input_file/.in./.out.}
   program_out=/croj/tmp/$(basename ${input_file/.in./.pout.})
 
-  echo $i >> $log_file
+  echo $input_file >> $log_file
 
   # execute the program
   (time -p (./croj/timeout.sh "$timelimit" bash -c "./croj/tmp/bin/program < $input_file > $program_out 2>> /croj/tmp/err" )) > /croj/tmp/time 2>&1
